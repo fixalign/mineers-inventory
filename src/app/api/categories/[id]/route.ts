@@ -1,15 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: { params: { id: string } | Promise<{ id: string }> }) {
+  const { params } = context as { params: { id: string } };
   const { data, error } = await supabase
     .from("in_categories")
     .select("*")
@@ -23,10 +21,8 @@ export async function GET(
   return NextResponse.json(data);
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: { params: { id: string } | Promise<{ id: string }> }) {
+  const { params } = context as { params: { id: string } };
   const body = await request.json();
 
   const { data, error } = await supabase
@@ -42,10 +38,8 @@ export async function PUT(
   return NextResponse.json(data[0]);
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } | Promise<{ id: string }> }) {
+  const { params } = context as { params: { id: string } };
   const { error } = await supabase
     .from("in_categories")
     .delete()
