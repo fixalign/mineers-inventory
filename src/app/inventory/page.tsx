@@ -11,7 +11,9 @@ export default function InventoryPage() {
   const [suppliers, setSuppliers] = useState([]);
   const [storageLocations, setStorageLocations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -51,6 +53,7 @@ export default function InventoryPage() {
 
   const handleAddItem = async (itemData: any) => {
     try {
+      setActionLoading(true);
       const response = await fetch("/api/items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,18 +66,42 @@ export default function InventoryPage() {
       }
     } catch (error) {
       console.error("Error adding item:", error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleEdit = async (item: any) => {
-    // TODO: Implement edit functionality
-    console.log("Edit item:", item);
+    setEditingItem(item);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdate = async (id: string, itemData: any) => {
+    try {
+      setActionLoading(true);
+      const response = await fetch(`/api/items/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(itemData),
+      });
+
+      if (response.ok) {
+        fetchData();
+        setIsModalOpen(false);
+        setEditingItem(null);
+      }
+    } catch (error) {
+      console.error("Error updating item:", error);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this item?")) return;
 
     try {
+      setActionLoading(true);
       const response = await fetch(`/api/items/${id}`, {
         method: "DELETE",
       });
@@ -84,6 +111,8 @@ export default function InventoryPage() {
       }
     } catch (error) {
       console.error("Error deleting item:", error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -118,14 +147,21 @@ export default function InventoryPage() {
             items={items}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            isLoading={actionLoading}
           />
         )}
       </div>
 
       <AddItemModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingItem(null);
+        }}
         onAdd={handleAddItem}
+        onUpdate={handleUpdate}
+        initialData={editingItem}
+        isLoading={actionLoading}
         categories={categories}
         brands={brands}
         suppliers={suppliers}

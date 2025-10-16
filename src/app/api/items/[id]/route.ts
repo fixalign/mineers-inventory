@@ -10,7 +10,7 @@ export async function GET(
   request: NextRequest,
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
-  const { params } = context as { params: { id: string } };
+  const params = (await context.params) as { id: string };
   const { data, error } = await supabase
     .from("in_items")
     .select("*")
@@ -28,7 +28,7 @@ export async function PUT(
   request: NextRequest,
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
-  const { params } = context as { params: { id: string } };
+  const params = (await context.params) as { id: string };
   const body = await request.json();
 
   const { data, error } = await supabase
@@ -48,7 +48,7 @@ export async function DELETE(
   request: NextRequest,
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
-  const { params } = context as { params: { id: string } };
+  const params = (await context.params) as { id: string };
   const { error } = await supabase
     .from("in_items")
     .delete()

@@ -4,12 +4,14 @@ interface InventoryTableProps {
   items: any[];
   onEdit: (item: any) => void;
   onDelete: (id: string) => void;
+  isLoading?: boolean;
 }
 
 export default function InventoryTable({
   items,
   onEdit,
   onDelete,
+  isLoading = false,
 }: InventoryTableProps) {
   return (
     <div className="overflow-x-auto">
@@ -71,13 +73,15 @@ export default function InventoryTable({
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   onClick={() => onEdit(item)}
-                  className="text-teal-600 hover:text-teal-900 font-medium mr-4 transition-colors"
+                  disabled={isLoading}
+                  className="text-teal-600 hover:text-teal-900 font-medium mr-4 transition-colors disabled:opacity-50"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onDelete(item.id)}
-                  className="text-red-600 hover:text-red-900 font-medium transition-colors"
+                  disabled={isLoading}
+                  className="text-red-600 hover:text-red-900 font-medium transition-colors disabled:opacity-50"
                 >
                   Delete
                 </button>
