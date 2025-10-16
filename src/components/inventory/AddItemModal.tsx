@@ -84,10 +84,10 @@ export default function AddItemModal({
       storage_location_id: formData.storage_location_id || null,
     };
 
-  // Convert empty date strings to null so backend receives NULL
-  const submission: any = submissionData;
-  if (!submission.purchase_date) submission.purchase_date = null;
-  if (!submission.expiry_date) submission.expiry_date = null;
+    // Convert empty date strings to null so backend receives NULL
+    const submission: any = submissionData;
+    if (!submission.purchase_date) submission.purchase_date = null;
+    if (!submission.expiry_date) submission.expiry_date = null;
 
     if (initialData && initialData.id && typeof onUpdate === "function") {
       onUpdate(initialData.id, submission);
@@ -190,7 +190,7 @@ export default function AddItemModal({
               </label>
               <input
                 type="number"
-                required
+                // required
                 className={inputClassName}
                 value={formData.quantity_in_stock}
                 onChange={(e) =>
@@ -207,7 +207,7 @@ export default function AddItemModal({
               </label>
               <input
                 type="text"
-                required
+                // required
                 placeholder="e.g., pieces, boxes, ml"
                 className={inputClassName}
                 value={formData.unit}
@@ -343,7 +343,13 @@ export default function AddItemModal({
               disabled={isLoading}
               className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md transition-all disabled:opacity-50"
             >
-              {isLoading ? (initialData ? "Saving..." : "Adding...") : initialData ? "Save Changes" : "Add Item"}
+              {isLoading
+                ? initialData
+                  ? "Saving..."
+                  : "Adding..."
+                : initialData
+                ? "Save Changes"
+                : "Add Item"}
             </button>
           </div>
         </form>
