@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
+
 interface InventoryTableProps {
   items: any[];
   onEdit: (item: any) => void;
   onDelete: (id: string) => void;
   isLoading?: boolean;
+  categories?: any[];
+  storageLocations?: any[];
+  initialStockFilter?: "all" | "in" | "low";
 }
 
 export default function InventoryTable({
@@ -12,9 +17,92 @@ export default function InventoryTable({
   onEdit,
   onDelete,
   isLoading = false,
+  categories = [],
+  storageLocations = [],
+  initialStockFilter,
 }: InventoryTableProps) {
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [stockFilter, setStockFilter] = useState<"all" | "in" | "low">(
+    (initialStockFilter as any) || "all"
+  );
+
+  const filteredItems = items.filter((item) => {
+    // search by name, description, notes
+    const q = query.trim().toLowerCase();
+    if (q) {
+      const hay =
+        `${item.item_name} ${item.type_description} ${item.notes}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+
+    if (categoryFilter) {
+      const catId = item.category_id || item.category?.id || "";
+      if (catId !== categoryFilter) return false;
+    }
+
+    if (locationFilter) {
+      const locId = item.storage_location_id || item.storage_location?.id || "";
+      if (locId !== locationFilter) return false;
+    }
+
+    if (stockFilter && stockFilter !== "all") {
+      const qty = Number(item.quantity_in_stock ?? 0);
+      const min = Number(item.minimum_stock_level ?? 0);
+      if (stockFilter === "low") {
+        if (!(qty <= min)) return false;
+      } else if (stockFilter === "in") {
+        if (!(qty > min)) return false;
+      }
+    }
+
+    return true;
+  });
   return (
     <div className="overflow-x-auto">
+      <div className="flex items-center gap-3 mb-4">
+        <input
+          type="search"
+          placeholder="Search items..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="border rounded px-3 py-2 w-80"
+        />
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="border rounded px-3 py-2"
+        >
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={locationFilter}
+          onChange={(e) => setLocationFilter(e.target.value)}
+          className="border rounded px-3 py-2"
+        >
+          <option value="">All Locations</option>
+          {storageLocations.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={stockFilter}
+          onChange={(e) => setStockFilter(e.target.value as any)}
+          className="border rounded px-3 py-2"
+        >
+          <option value="all">All Stock</option>
+          <option value="in">In Stock</option>
+          <option value="low">Low Stock</option>
+        </select>
+      </div>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -25,7 +113,7 @@ export default function InventoryTable({
               Category
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Brand
+              Storage Location
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Quantity
@@ -42,7 +130,7 @@ export default function InventoryTable({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <tr key={item.id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {item.item_name}
@@ -51,7 +139,9 @@ export default function InventoryTable({
                 {item.category?.name || "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {item.brand?.name || "N/A"}
+                {item.storage_location?.name ||
+                  item.storage_location_id ||
+                  "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {item.quantity_in_stock} {item.unit}

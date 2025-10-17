@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import InventoryTable from "@/components/inventory/InventoryTable";
 import AddItemModal from "@/components/inventory/AddItemModal";
+import { useSearchParams } from "next/navigation";
 
 export default function InventoryPage() {
   const [items, setItems] = useState([]);
@@ -15,9 +16,18 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     fetchData();
   }, []);
+  const rawStock = searchParams?.get("stock") || undefined;
+  const initialStock =
+    rawStock === "low" || rawStock === "in"
+      ? (rawStock as "low" | "in")
+      : rawStock === "all"
+      ? "all"
+      : undefined;
 
   const fetchData = async () => {
     try {
@@ -148,6 +158,9 @@ export default function InventoryPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             isLoading={actionLoading}
+            categories={categories}
+            storageLocations={storageLocations}
+            initialStockFilter={initialStock}
           />
         )}
       </div>

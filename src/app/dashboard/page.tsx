@@ -88,7 +88,7 @@ export default function DashboardPage() {
         </Link>
 
         <Link
-          href="/inventory"
+          href="/inventory?stock=low"
           className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
         >
           <h3 className="text-gray-500 text-sm font-medium">Low Stock Items</h3>
